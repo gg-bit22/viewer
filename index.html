@@ -3,29 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <!-- 모바일 앱처럼 보이게 만드는 설정 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>시리즈 뷰어</title>
     <style>
         :root {
-            /* 라이트모드 색상 */
             --bg-color: #ffffff;
-            --input-bg: #f9f9f9;
             --text-color: #222222;
-            --btn-bg: #333333;
-            --btn-text: #ffffff;
+            --input-bg: #f9f9f9;
             --primary-color: #00c73c; /* 네이버 포인트 컬러 */
-            --safe-area-inset-top: env(safe-area-inset-top, 0px);
+            --safe-area-top: env(safe-area-inset-top, 0px);
         }
 
-        /* 다크모드 설정 */
-        body.dark-mode {
-            --bg-color: #1e1e1e;
-            --input-bg: #2a2a2a;
-            --text-color: #d1d1d1;
-            --btn-bg: #444444;
-        }
+        /* 배경 테마 설정 */
+        body.theme-white { --bg-color: #ffffff; --text-color: #222222; }
+        body.theme-ivory { --bg-color: #f4f0ea; --text-color: #332d29; } /* 눈이 편한 크림/아이보리 */
+        body.theme-sepia { --bg-color: #e8dec8; --text-color: #403225; }
+        body.theme-dark  { --bg-color: #121212; --text-color: #d1d1d1; }
 
         * {
             box-sizing: border-box;
@@ -35,20 +29,20 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
             background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
             padding: 0;
-            overflow: hidden; /* 스크롤은 각 섹션 내에서 처리 */
+            overflow: hidden;
             height: 100vh;
+            transition: background-color 0.2s, color 0.2s;
         }
 
-        /* 앱 전체 컨테이너 */
         .app-wrapper {
             width: 100%;
             height: 100%;
             position: relative;
         }
 
-        /* 각 단계별 전체화면 섹션 공통 스타일 */
         .page-section {
             width: 100%;
             height: 100%;
@@ -57,18 +51,18 @@
             left: 0;
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease-in-out; /* 화면 전환 애니메이션 */
+            transition: transform 0.3s ease-in-out;
             background-color: var(--bg-color);
         }
 
-        /* --- [1단계] 원고 붙여넣기 섹션 --- */
+        /* --- [1단계] 입력 섹션 --- */
         #stepInput {
-            transform: translateX(0); /* 기본 화면 */
+            transform: translateX(0);
             z-index: 10;
         }
 
         .input-header {
-            padding: calc(15px + var(--safe-area-inset-top)) 20px 15px;
+            padding: calc(12px + var(--safe-area-top)) 16px 12px;
             background-color: #222;
             color: #fff;
             display: flex;
@@ -78,24 +72,24 @@
 
         .input-header h1 {
             margin: 0;
-            font-size: 16px;
+            font-size: 15px;
         }
 
         .main-btn {
             background-color: var(--primary-color);
             color: #fff;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
         }
 
         .editor-container {
             flex: 1;
-            padding: 20px;
-            background-color: var(--input-bg);
+            padding: 16px;
+            background-color: #f2f2f2;
             display: flex;
             flex-direction: column;
         }
@@ -104,19 +98,19 @@
             width: 100%;
             flex: 1;
             padding: 15px;
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
             border-radius: 8px;
             outline: none;
             resize: none;
             font-size: 15px;
             line-height: 1.6;
             background: #fff;
-            color: #333;
-            margin-bottom: 15px;
+            color: #222;
+            margin-bottom: 12px;
         }
 
         .clipboard-btn {
-            background-color: #555;
+            background-color: #444;
             color: #fff;
             border: none;
             padding: 12px;
@@ -125,65 +119,71 @@
             cursor: pointer;
         }
 
-        /* --- [2단계] 시리즈 뷰어 섹션 (전체화면) --- */
+        /* --- [2단계] 시리즈 뷰어 섹션 --- */
         #stepView {
-            transform: translateX(100%); /* 처음에 오른쪽에 숨김 */
+            transform: translateX(100%);
             z-index: 20;
         }
 
-        /* 뷰어 화면 상단바 (실제 앱처럼 얇게) */
         .viewer-header {
-            padding: calc(10px + var(--safe-area-inset-top)) 15px 10px;
-            background: rgba(0,0,0,0.8);
+            padding: calc(8px + var(--safe-area-top)) 12px 8px;
+            background: rgba(0,0,0,0.85);
             color: #fff;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 13px;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
-        .viewer-header-btns {
+        .viewer-controls {
             display: flex;
-            gap: 8px;
+            gap: 6px;
+            align-items: center;
         }
 
         .viewer-btn {
             background: rgba(255,255,255,0.2);
             color: #fff;
             border: none;
-            padding: 5px 10px;
+            padding: 5px 8px;
             border-radius: 4px;
             font-size: 12px;
             cursor: pointer;
         }
 
-        /* 시리즈 조판 뷰어 메인 영역 (전체화면) */
+        /* 테마 선택 드롭다운 */
+        select.viewer-btn {
+            background: #333;
+            color: #fff;
+            outline: none;
+        }
+
+        /* 시리즈 조판 뷰어 본문 */
         .series-viewport {
             flex: 1;
-            padding: 30px 22px; /* 시리즈 표준 여백 */
+            padding: 24px 22px;
             overflow-y: auto;
             color: var(--text-color);
             background-color: var(--bg-color);
             
-            /* 네이버 시리즈 조판 규격 */
-            font-family: "KoPubWorldBatang", "KoPubBatang", "Nanum Myeongjo", serif; /* 명조체 기본 */
-            font-size: 16px;
-            line-height: 1.8; /* 시리즈 행간 비율 */
-            letter-spacing: -0.03em; /* 자간 */
-            word-break: break-all; /* 한글 단어 끊김 대응 */
-            white-space: pre-wrap; /* 줄바꿈 유지 */
+            /* 기본 네이버 시리즈 조판 규격 */
+            font-family: "KoPubWorldBatang", "KoPubBatang", "Nanum Myeongjo", serif;
+            font-size: 16px; /* 기본 크기 */
+            line-height: 1.8;
+            letter-spacing: -0.03em;
+            word-break: break-all;
+            white-space: pre-wrap;
         }
 
-        /* 화면 전환 시 애니메이션 클래스 */
         .slide-in {
             transform: translateX(0) !important;
         }
-
     </style>
 </head>
-<body>
+<body class="theme-white">
 
-<div class="app-wrapper">
+<div class="app-wrapper" id="appWrapper">
 
     <!-- [1단계] 원고 붙여넣기 섹션 -->
     <div id="stepInput" class="page-section">
@@ -193,7 +193,7 @@
         </div>
         
         <div class="editor-container">
-            <textarea id="rawInput" placeholder="여기에 원고를 직접 입력하거나 아래 [📋 클립보드 붙여넣기] 버튼을 누르세요."></textarea>
+            <textarea id="rawInput" placeholder="여기에 원고를 입력하거나 아래 [📋 클립보드 붙여넣기]를 누르세요."></textarea>
             <button class="clipboard-btn" onclick="pasteFromClipboard()">📋 클립보드 붙여넣기 및 바로 보기</button>
         </div>
     </div>
@@ -202,13 +202,29 @@
     <div id="stepView" class="page-section">
         <div class="viewer-header">
             <button class="viewer-btn" onclick="moveToInput()">🔙 뒤로</button>
-            <div class="viewer-header-btns">
-                <button class="viewer-btn" onclick="toggleFont()">글꼴 변경</button>
-                <button class="viewer-btn" onclick="toggleDarkMode()">다크모드</button>
+            
+            <div class="viewer-controls">
+                <!-- 글자 크기 조절 -->
+                <button class="viewer-btn" onclick="changeFontSize(-1)">A-</button>
+                <button class="viewer-btn" onclick="changeFontSize(1)">A+</button>
+                
+                <!-- 폰트 체인지 -->
+                <button class="viewer-btn" onclick="toggleFont()">글꼴</button>
+
+                <!-- 배경 테마 선택 샘플 -->
+                <select class="viewer-btn" onchange="changeTheme(this.value)">
+                    <option value="theme-white">화이트</option>
+                    <option value="theme-ivory" selected>아이보리</option>
+                    <option value="theme-sepia">세피아</option>
+                    <option value="theme-dark">다크</option>
+                </select>
+
+                <!-- 완전 전체화면 토글 -->
+                <button class="viewer-btn" onclick="toggleFullscreen()">⛶ 전체화면</button>
             </div>
         </div>
         
-        <!-- 이 영역이 핸드폰 전체화면에서 시리즈 조판으로 보입니다. -->
+        <!-- 미리보기 뷰어 영역 -->
         <div id="seriesViewer" class="series-viewport"></div>
     </div>
 
@@ -219,8 +235,11 @@
     const seriesViewer = document.getElementById('seriesViewer');
     const stepInput = document.getElementById('stepInput');
     const stepView = document.getElementById('stepView');
+    const appWrapper = document.getElementById('appWrapper');
 
-    // 1. [1단계 -> 2단계] 뷰어 화면으로 이동 (전체화면 전환)
+    let currentFontSize = 16; // 기본 글자 크기 (px)
+
+    // 1. 뷰어 화면으로 이동
     function moveToViewer() {
         const text = rawInput.value;
         if (!text.trim()) {
@@ -229,41 +248,48 @@
             return;
         }
 
-        // 입력된 텍스트를 뷰어에 동기화
         seriesViewer.textContent = text;
-        seriesViewer.scrollTop = 0; // 스크롤 맨 위로 초기화
+        seriesViewer.scrollTop = 0;
 
-        // 화면 전환 애니메이션
-        stepInput.style.transform = 'translateX(-100%)'; // 입력창은 왼쪽으로 숨김
-        stepView.classList.add('slide-in'); // 뷰어창이 오른쪽에서 들어옴
+        stepInput.style.transform = 'translateX(-100%)';
+        stepView.classList.add('slide-in');
     }
 
-    // 2. [2단계 -> 1단계] 입력 화면으로 되돌아가기
+    // 2. 입력 화면으로 복귀
     function moveToInput() {
+        // 전체화면이 켜져 있다면 해제
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        }
         stepInput.style.transform = 'translateX(0)';
         stepView.classList.remove('slide-in');
     }
 
-    // 3. 클립보드 자동 붙여넣기 편의 기능
+    // 3. 클립보드 붙여넣기
     async function pasteFromClipboard() {
         try {
-            // 모바일에서 클립보드 접근 권한 필요
             const text = await navigator.clipboard.readText();
             if (text) {
                 rawInput.value = text;
-                // 붙여넣기 성공 시 바로 뷰어 모드로 전환
                 moveToViewer();
             } else {
                 alert('클립보드에 복사된 텍스트가 없습니다.');
             }
         } catch (err) {
-            // 브라우저 보안 정책상 직접 입력을 유도
             alert('입력창을 터치한 뒤 팝업 메뉴에서 [붙여넣기]를 직접 진행해 주세요.');
             rawInput.focus();
         }
     }
 
-    // 4. 뷰어 옵션: 폰트 변경 (명조 <-> 고딕)
+    // 4. 글자 크기 조절 기능 (최대/최소 제한)
+    function changeFontSize(delta) {
+        currentFontSize += delta;
+        if (currentFontSize < 12) currentFontSize = 12;
+        if (currentFontSize > 26) currentFontSize = 26;
+        seriesViewer.style.fontSize = currentFontSize + 'px';
+    }
+
+    // 5. 바탕/명조 <-> 고딕 폰트 토글
     let isSerif = true;
     function toggleFont() {
         isSerif = !isSerif;
@@ -274,9 +300,27 @@
         }
     }
 
-    // 5. 뷰어 옵션: 다크모드 토글
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
+    // 6. 배경 테마 변경 (화이트/아이보리/세피아/다크)
+    function changeTheme(themeClass) {
+        document.body.className = themeClass;
+    }
+
+    // 기본 테마를 눈이 편한 아이보리로 설정
+    document.body.className = 'theme-ivory';
+
+    // 7. 완전 전체화면 (주소창 숨기기) 토글 기능
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            if (appWrapper.requestFullscreen) {
+                appWrapper.requestFullscreen();
+            } else if (appWrapper.webkitRequestFullscreen) { /* 아이폰/사파리 대응 */
+                appWrapper.webkitRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
     }
 </script>
 
